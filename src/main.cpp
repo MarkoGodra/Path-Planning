@@ -57,10 +57,11 @@ int main() {
   }
 
   int lane = 1;
-  double ref_vel = 49.5;
+  double ref_vel = 0.0;
+  const double speed_limit = 49.5;
 
   h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
-               &map_waypoints_dx,&map_waypoints_dy, &ref_vel, &lane]
+               &map_waypoints_dx,&map_waypoints_dy, &ref_vel, &lane, speed_limit]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -97,14 +98,59 @@ int main() {
           //   of the road.
           auto sensor_fusion = j[1]["sensor_fusion"];
 
+          // Size of previous path
+          int prev_size = previous_path_x.size();
+
+          // If it is not begining, s is last consumed value from previous path
+          if(prev_size > 0)
+          {
+              car_s = end_path_s;
+          }
+
+          // There is no collision warning on each start of each iteration
+          bool collision_warning = false;
+
+          // Check detections for car in our lane
+          for(const auto& detection : sensor_fusion)
+          {
+              // Detected car d coordinate
+              double d = detection[6];
+
+              // If car is in our lane
+              if(d < (2 + 4 * lane + 2) && d > (2 + 4 * lane - 2))
+              {
+                  double vx = detection[3];
+                  double vy = detection[4];
+
+                  double check_car_speed = sqrt(vx * vx + vy * vy);
+                  double check_car_s = detection[5];
+
+                  check_car_s += static_cast<double>(prev_size) * 0.02 * check_car_speed;
+                  if((check_car_s > car_s) && (check_car_s - car_s < 30))
+                  {
+                      collision_warning = true;
+                  }
+              }
+          }
+
+          if(collision_warning)
+          {
+              ref_vel -= 0.224;
+          }
+          else
+          {
+              if(ref_vel < speed_limit)
+              {
+                  ref_vel += 0.224;
+              }
+          }
+
           vector<double> ptsx;
           vector<double> ptsy;
 
           double ref_x = car_x;
           double ref_y = car_y;
           double ref_yaw = deg2rad(car_yaw);
-
-          int prev_size = previous_path_x.size();
 
           if(prev_size < 2)
           {
