@@ -111,6 +111,7 @@ int main() {
           bool collision_warning = false;
 
           // Check detections for car in our lane
+          double car_in_front_speed = 0.0;
           for(const auto& detection : sensor_fusion)
           {
               // Detected car d coordinate
@@ -128,14 +129,26 @@ int main() {
                   check_car_s += static_cast<double>(prev_size) * 0.02 * check_car_speed;
                   if((check_car_s > car_s) && (check_car_s - car_s < 30))
                   {
+                      car_in_front_speed = check_car_speed;
                       collision_warning = true;
+                      if(lane == 0)
+                      {
+                          lane = 1;
+                      }
+                      else if(lane == 1)
+                      {
+                          lane = 0;
+                      }
                   }
               }
           }
 
           if(collision_warning)
           {
-              ref_vel -= 0.224;
+              if(ref_vel >= car_in_front_speed)
+              {
+                  ref_vel -= 0.224;
+              }
           }
           else
           {
