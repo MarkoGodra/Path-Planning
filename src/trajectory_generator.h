@@ -46,6 +46,7 @@ private:
     static constexpr double kHorizon = 30.0;
     static constexpr int32_t kNumOfAnchors = 3;
     static constexpr double kForwardAnchorsDistance = 30.0;
+    static constexpr double kLaneWidth = 4.0;
 };
 
 #endif // TRAJECTORY_GENERATOR_H

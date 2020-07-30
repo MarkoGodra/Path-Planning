@@ -61,7 +61,7 @@ std::tuple<std::vector<double>, std::vector<double>> TrajectoryGenerator::Genera
     for(auto i = 1; i <= kNumOfAnchors; i++)
     {
         double s_increment = i * forward_anchors_distance;
-        vector<double> xy = getXY(vehicle.car_s + s_increment, (2 + 4 * target_lane), map_.map_waypoints_s, map_.map_waypoints_x, map_.map_waypoints_y);
+        vector<double> xy = getXY(vehicle.car_s + s_increment, ((kLaneWidth / 2) + kLaneWidth * target_lane), map_.map_waypoints_s, map_.map_waypoints_x, map_.map_waypoints_y);
 
         // Now we are generating path in front
         ptsx.push_back(xy[0]);
