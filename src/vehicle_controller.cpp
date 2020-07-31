@@ -135,17 +135,22 @@ void VehicleController::HandleKLState(const Vehicle& vehicle)
     {
         double distance_to_vehicle = GetDistanceToObstacle(vehicle, vehicle_in_front);
 
-        velocity_controller_.SetTargetVelocity(kSafeSpeed);
-        velocity_controller_.SetAction(VelocityAction::kConstantSpeed);
-
         // In order to avoid chrash brake
-        if(distance_to_vehicle <= kBufferDistance / 2)
+        if(distance_to_vehicle <= kBufferDistance * 0.25)
         {
             velocity_controller_.SetAction(VelocityAction::kSlowdown);
         }
-        else if(distance_to_vehicle < kBufferDistance && distance_to_vehicle > kBufferDistance / 2)
+        if(distance_to_vehicle <= kBufferDistance / 2 && distance_to_vehicle > kBufferDistance * 0.25)
+        {
+            // Take speed of vehicle in front
+            double target_speed = sqrt(vehicle_in_front.x_vel * vehicle_in_front.x_vel + vehicle_in_front.y_vel * vehicle_in_front.y_vel);
+            velocity_controller_.SetTargetVelocity(target_speed);
+            velocity_controller_.SetAction(VelocityAction::kConstantSpeed);
+        }
+        else if(distance_to_vehicle < kBufferDistance * 0.75 && distance_to_vehicle > kBufferDistance / 2)
         {
             // If distance is not too close, just keep constant velocity
+            velocity_controller_.SetTargetVelocity(kSafeSpeed);
             velocity_controller_.SetAction(VelocityAction::kConstantSpeed);
         }
 
@@ -281,7 +286,7 @@ bool VehicleController::IsLaneChangePossible(const Vehicle& vehicle, int32_t tar
             double velocity = sqrt((vx * vx) + (vy * vy));
             double detection_s_position = detection.s + 0.02 * velocity;
 
-            if((detection_s_position < vehicle.car_s + kBufferDistance) && (detection_s_position > vehicle.car_s - kBufferDistance))
+            if((detection_s_position < vehicle.car_s + kBufferDistance * 0.75) && (detection_s_position > vehicle.car_s - kBufferDistance * 0.75))
             {
                 gap_available = false;
             }

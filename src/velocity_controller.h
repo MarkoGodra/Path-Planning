@@ -22,6 +22,7 @@ public:
 private:
     static constexpr double kMaximumVelocity = 49.5;
     static constexpr double kMaximumAcceleration = 0.5;
+    static constexpr double kMaximumDeacceleration = 0.224;
 
     double target_velocity_;
     double current_velocity_;
