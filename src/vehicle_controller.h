@@ -26,8 +26,8 @@ public:
 
 private:
     void SelectManeuver(const Vehicle& vehicle, json::iterator& predictions_begin,
-                        json::iterator predictions_end, bool current_lane_occupied, const double& forward_vehicle_speed);
-    std::tuple<bool, double> CheckForForwardDetection(Vehicle& vehicle, json::iterator& predictions_begin, json::iterator predictions_end);
+                        json::iterator predictions_end, const std::tuple<bool, bool, bool>& lanes_occupancy);
+    std::tuple<bool, bool, bool> CheckSurroundings(Vehicle& vehicle, json::iterator& predictions_begin, json::iterator predictions_end);
 
     VehicleState state_;
     int32_t lane_;
