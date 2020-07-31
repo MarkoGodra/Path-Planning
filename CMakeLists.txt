@@ -16,6 +16,8 @@ set(sources
     src/helpers.cpp
     src/json.hpp
     src/vehicle.h
+    src/velocity_controller.h
+    src/velocity_controller.cpp
 )
 
 

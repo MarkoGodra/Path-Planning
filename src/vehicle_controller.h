@@ -7,6 +7,7 @@
 
 #include "trajectory_generator.h"
 #include "json.hpp"
+#include "velocity_controller.h"
 
 enum class VehicleState : uint8_t
 {
@@ -39,10 +40,11 @@ private:
     static constexpr double kSpeedLimit = 49.5;
     static constexpr double kBufferDistance = 30.0;
     static constexpr double kLaneWidth = 4.0;
+    static constexpr double kSafeSpeed = 40.0;
 
     void SelectManeuver(const Vehicle& vehicle);
     void CheckSurroundings(Vehicle& vehicle, json::iterator& predictions_begin, json::iterator predictions_end);
-    bool CurrentLaneOccuied(const Vehicle& vehicle);
+    DetectedVehicle CurrentLaneOccuied(const Vehicle& vehicle);
     bool IsLaneChangedCompleted(const Vehicle& vehicle);
 
     // State specific functions
@@ -50,10 +52,16 @@ private:
     void HandleLCLState(const Vehicle& vehicle);
     void HandleLCRState(const Vehicle& vehicle);
 
+    double GetDistanceToObstacle(const Vehicle& vehicle, const DetectedVehicle& detection);
+    bool IsLaneChangePossible(const Vehicle& vehicle, int32_t target_lane);
+
+    double Sigmoid(const double& x, const double& y);
+    double LaneCostFunction(const Vehicle& vehicle, int32_t target_lane);
+
     VehicleState state_;
     int32_t lane_;
-    double ref_vel_;
     TrajectoryGenerator trajectory_generator_;
+    VelocityController velocity_controller_;
 
     std::array<std::vector<DetectedVehicle>, kNumOfLanes> lanes_occupancy_;
 };
