@@ -100,9 +100,15 @@ KL - Keep Lane.
 LCL - Lane Change Left
 LCR - Lane Change Right
 
-Vehicle starts in Keep Lane state and if there is not vehicle in it's current lane it accelerates to near speed limit. Velocity controll is done via `VelocityController` defined in `velocity_controller.h`. This module handles moving actions like accelerating/deaccelerating/keeping constant speed.
+Vehicle starts in Keep Lane state and if there is no vehicle in it's current lane it accelerates to near speed limit. Velocity controll is done via `VelocityController` defined in `velocity_controller.h`. This module handles moving actions like accelerating/deaccelerating/keeping constant speed.
 
-After all state transitions are taken, and velocity controller has been instructed on what to do (accelerate, slow down, keep speed) than trajectory is generated via `TrajectoryGenerator` class defined in `trajectory_generator.h`, function `GenerateTrajectory()`. This class handles trajectory generation, based on given inputs such as vehicle's currnet state (x/y position, x/y speed, s/d possition etc.), target lane, and target velocity. Target lane and target velocity have already been calculated at this point via VehicleController logic. 
+After all state transitions are taken, and velocity controller has been instructed on what to do (accelerate, slow down, keep speed) than trajectory is generated via `TrajectoryGenerator` class defined in `trajectory_generator.h`, function `GenerateTrajectory()`. This class handles trajectory generation, based on given inputs such as vehicle's currnet state (x/y position, x/y speed, s/d possition etc.), target lane, and target velocity. Target lane and target velocity have already been calculated at this point via VehicleController logic. Trajectory is being calculated in following way:
+
+- Trajectory is generated based on anchor points. In order to ensure smooth trajectory, previous 2 points are reused. In addition to this, 3 forward anchor points are added (dependent on target lane).
+- Based on these anchor points, spline is fitted and this spline shall be used to generate filler points
+- After anchor points have been generated, filler points are also generated. All unvisited points from previous iteration path are reused.
+- Rest of filler points is calculated in following way: Horizon point is taken (Location 30 meters in front of the vehicle). Based on this location and target speed and acceleration filler points are calculated.
+- These trajectory points are in the end forwarded to the simulator and they are vistited with ego vehicle.
 
 As already said `VehicleController` implements following behavior:
 
